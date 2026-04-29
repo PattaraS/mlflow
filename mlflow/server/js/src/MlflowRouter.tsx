@@ -27,7 +27,6 @@ import { getGatewayRouteDefs } from './gateway/route-defs';
 import { getAdminRouteDefs } from './admin/route-defs';
 import { useInitializeExperimentRunColors } from './experiment-tracking/components/experiment-page/hooks/useExperimentRunColor';
 import { MlflowSidebar } from './common/components/MlflowSidebar';
-import { MlflowTopBar } from './common/components/MlflowTopBar';
 import { AssistantProvider, AssistantRouteContextProvider } from './assistant';
 import { RootAssistantLayout } from './common/components/RootAssistantLayout';
 import {
@@ -81,7 +80,9 @@ const MlflowRootLayout = ({
     >
       <ErrorModal />
       <AppErrorBoundary>
-        <MlflowTopBar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+        {/* Top-bar is intentionally not rendered in this comparison build —
+            see ``MlflowSidebar`` for the avatar/account widget that takes
+            its place at the bottom-left of the sidebar. */}
         <RootAssistantLayout>
           <div
             css={{

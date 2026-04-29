@@ -1551,6 +1551,7 @@ module.exports = {
   "mlflow.shared.copy_button.tooltip": "",
 
   // -- mlflow.sidebar --
+  "mlflow.sidebar.account": "",
   "mlflow.sidebar.assistant_beta_tag": "",
   "mlflow.sidebar.assistant_button": "",
   "mlflow.sidebar.assistant_tooltip": "",
@@ -1563,6 +1564,7 @@ module.exports = {
   "mlflow.sidebar.gateway_usage_tab_link": "",
   "mlflow.sidebar.home_tab_link": "",
   "mlflow.sidebar.logo_home_link": "",
+  "mlflow.sidebar.logout": "",
   "mlflow.sidebar.models_tab_link": "",
   "mlflow.sidebar.prompts_tab_link": "",
   "mlflow.sidebar.settings_back_link": "",

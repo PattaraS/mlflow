@@ -1,9 +1,11 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  Avatar,
   BeakerIcon,
   Button,
   CloudModelIcon,
+  DropdownMenu,
   GearIcon,
   HomeIcon,
   ModelsIcon,
@@ -19,12 +21,15 @@ import {
   Tooltip,
   NewWindowIcon,
 } from '@databricks/design-system';
+import { useQueryClient } from '@mlflow/mlflow/src/common/utils/reactQueryHooks';
 import type { Location } from '../utils/RoutingUtils';
-import { Link, matchPath, useLocation, useParams, useSearchParams } from '../utils/RoutingUtils';
+import { Link, matchPath, useLocation, useNavigate, useParams, useSearchParams } from '../utils/RoutingUtils';
 import ExperimentTrackingRoutes from '../../experiment-tracking/routes';
 import { ModelRegistryRoutes } from '../../model-registry/routes';
 import GatewayRoutes from '../../gateway/routes';
-import { useIsAuthAvailable } from '../../admin/hooks';
+import AdminRoutes from '../../admin/routes';
+import { useCurrentUserQuery, useIsAuthAvailable } from '../../admin/hooks';
+import { performLogout } from '../../admin/auth-utils';
 import { GatewayLabel, GatewayNewTag } from './GatewayNewTag';
 import { FormattedMessage } from 'react-intl';
 import { useLogTelemetryEvent } from '../../telemetry/hooks/useLogTelemetryEvent';
@@ -105,12 +110,18 @@ export function MlflowSidebar({
     setShowSidebar(!showSidebar);
   }, [setShowSidebar, showSidebar]);
 
-  // When the top-bar is rendered (auth-enabled deployments) it owns the
-  // brand row (logo, version, sidebar collapse button) AND the workspace
-  // selector — so the sidebar should skip those to avoid duplication. On
-  // auth-disabled deployments the top-bar isn't rendered, and the
-  // sidebar keeps its original layout.
-  const topBarRendered = useIsAuthAvailable();
+  // Comparison build: top-bar is not rendered, so the sidebar keeps its
+  // original header (logo + version + collapse) and workspace selector.
+  // The avatar/account widget lives at the bottom of this sidebar instead
+  // (see the bottom of the JSX). To revert to the top-bar layout, restore
+  // ``const topBarRendered = useIsAuthAvailable();`` and re-render
+  // ``<MlflowTopBar />`` from ``MlflowRouter``.
+  const topBarRendered = false;
+  const isAuthAvailable = useIsAuthAvailable();
+  const { data: currentUserData } = useCurrentUserQuery();
+  const username = currentUserData?.user?.username ?? '';
+  const queryClient = useQueryClient();
+  const navigate = useNavigate({ bypassWorkspacePrefix: true });
 
   // Persist the last selected experiment ID so the nested experiment view
   // stays visible when navigating away from experiment pages
@@ -430,6 +441,81 @@ export function MlflowSidebar({
             >
               <FormattedMessage defaultMessage="Settings" description="Sidebar link for settings page" />
             </MlflowSidebarLink>
+          )}
+          {/* Comparison build: account widget at the bottom-left of the
+              sidebar. To revert: delete this whole block and restore the
+              top-bar (see MlflowRouter / MlflowTopBar). */}
+          {isAuthAvailable && username && (
+            <div
+              css={{
+                marginTop: theme.spacing.sm,
+                paddingTop: theme.spacing.sm,
+                borderTop: `1px solid ${theme.colors.border}`,
+              }}
+            >
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`Account menu for ${username}`}
+                    css={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: theme.spacing.sm,
+                      width: '100%',
+                      background: 'transparent',
+                      border: 'none',
+                      paddingInline: showSidebar ? theme.spacing.sm : theme.spacing.xs,
+                      paddingBlock: theme.spacing.sm,
+                      cursor: 'pointer',
+                      borderRadius: theme.borders.borderRadiusSm,
+                      color: theme.colors.textPrimary,
+                      justifyContent: showSidebar ? 'flex-start' : 'center',
+                      ':hover': {
+                        backgroundColor: theme.colors.actionDefaultBackgroundHover,
+                      },
+                      ':focus-visible': {
+                        outline: `2px solid ${theme.colors.actionDefaultBorderFocus}`,
+                        outlineOffset: 2,
+                      },
+                      // Suppress the UA dotted underline + help cursor that
+                      // ``Avatar`` inherits from its inner ``<abbr title>``.
+                      '& abbr[title]': {
+                        textDecoration: 'none',
+                        cursor: 'inherit',
+                      },
+                    }}
+                  >
+                    <Avatar type="user" size="sm" label={username} />
+                    {showSidebar && (
+                      <Typography.Text
+                        css={{
+                          flex: 1,
+                          textAlign: 'left',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {username}
+                      </Typography.Text>
+                    )}
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content align="start" side="top" minWidth={180}>
+                  <DropdownMenu.Item
+                    componentId="mlflow.sidebar.account"
+                    onClick={() => navigate(AdminRoutes.accountPageRoute)}
+                  >
+                    <FormattedMessage defaultMessage="Account" description="Sidebar account menu item" />
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item componentId="mlflow.sidebar.logout" onClick={() => performLogout(queryClient)}>
+                    <FormattedMessage defaultMessage="Logout" description="Sidebar logout menu item" />
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
+            </div>
           )}
         </div>
       </nav>

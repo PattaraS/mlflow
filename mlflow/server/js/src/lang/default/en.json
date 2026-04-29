@@ -4667,6 +4667,10 @@
     "defaultMessage": "Do retrieved documents contain all necessary information?",
     "description": "Hint for RetrievalSufficiency template"
   },
+  "RekJb/": {
+    "defaultMessage": "Account",
+    "description": "Sidebar account menu item"
+  },
   "RgVN+O": {
     "defaultMessage": "View all",
     "description": "Home page news section view more link"
@@ -6882,6 +6886,10 @@
   "en7FHE": {
     "defaultMessage": "A Gateway endpoint routes your agent calls to any AI model, with built-in usage tracking through MLflow Tracing, budget controls, and more.",
     "description": "Gateway > Endpoints > Quick start description explaining what an endpoint is and how to get started"
+  },
+  "eosMdD": {
+    "defaultMessage": "Logout",
+    "description": "Sidebar logout menu item"
   },
   "erqoIC": {
     "defaultMessage": "Run Name:",
